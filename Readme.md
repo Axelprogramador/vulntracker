@@ -1,8 +1,8 @@
 # 🛡️ VulnTracker
 
-API REST para gestión y seguimiento de vulnerabilidades de seguridad dentro de una organización, desarrollada con Spring Boot siguiendo arquitectura hexagonal.
+API REST para gestión y seguimiento de vulnerabilidades de seguridad, desarrollada con Spring Boot siguiendo arquitectura hexagonal.
 
-## Tecnologías
+## Tecnologías utilizadas
 
 - **Java 21** + **Spring Boot 3.5**
 - **Arquitectura hexagonal** (ports & adapters)
@@ -16,11 +16,13 @@ API REST para gestión y seguimiento de vulnerabilidades de seguridad dentro de 
 ## Funcionalidades
 
 - Registro y login de usuarios con tokens JWT
-- Roles: `ADMIN` y `ANALYST`
-- CRUD de vulnerabilidades con severidad (LOW, MEDIUM, HIGH, CRITICAL)
+- Roles: `ADMIN` y `ANALYST` con permisos distintos
+- CRUD completo de vulnerabilidades con severidad (LOW, MEDIUM, HIGH, CRITICAL)
 - Cambio de estado (OPEN → IN_PROGRESS → RESOLVED)
 - Filtrado por severidad
-- Dashboard web con KPIs y tabla de vulnerabilidades
+- Dashboard web con KPIs, gráfica y tabla interactiva
+- Botón de borrado visible solo para ADMIN
+- Usuarios de demo precargados para pruebas inmediatas
 - API documentada con Swagger UI
 
 ## Arquitectura
@@ -63,9 +65,18 @@ docker compose up mysql -d
 ./mvnw spring-boot:run
 ```
 
+## Usuarios para pruebas
+
+El proyecto incluye 2 usuarios para probar los distintos roles:
+
+| Usuario | Contraseña | Rol | Permisos |
+|---------|------------|-----|----------|
+| `admin` | `admin123` | ADMIN | Crear, editar, cambiar estado y eliminar |
+| `analyst` | `analyst123` | ANALYST | Crear, editar y cambiar estado |
+
 ## API
 
-La documentación completa está disponible en Swagger UI: 
+La documentación completa está disponible en Swagger UI:
 http://localhost:8080/swagger-ui/index.html
 
 ### Endpoints principales
@@ -76,24 +87,15 @@ http://localhost:8080/swagger-ui/index.html
 | POST | `/api/auth/login` | Login, devuelve JWT | No |
 | GET | `/api/vulnerabilities` | Listar todas | Sí |
 | POST | `/api/vulnerabilities` | Crear vulnerabilidad | Sí |
+| PUT | `/api/vulnerabilities/{id}` | Editar vulnerabilidad | Sí |
 | PATCH | `/api/vulnerabilities/{id}/status` | Cambiar estado | Sí |
+| DELETE | `/api/vulnerabilities/{id}` | Eliminar (solo ADMIN) | Sí |
 | GET | `/api/vulnerabilities/filter?severity=HIGH` | Filtrar por severidad | Sí |
-
-### Ejemplo de uso
-
-```bash
-# 1. Registro
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"username": "axel", "password": "password123"}'
-
-# 2. Usar el token devuelto
-curl -X GET http://localhost:8080/api/vulnerabilities \
-  -H "Authorization: Bearer <token>"
-```
 
 ## Tests
 
 ```bash
 ./mvnw test
 ```
+
+Los tests unitarios cubren la capa de dominio con Mockito — sin base de datos ni Spring context.
